@@ -54,3 +54,26 @@ jobs:
         if: ${{ !env.ACT }}
       - run: docker push cortezaproject/corteza:${{ env.BUILD_VERSION }}
         if: ${{ !env.ACT }}
+
+  release-rpm:
+    runs-on: ubuntu-latest
+    env:
+      ENDPOINT: https://releases.cortezaproject.org/files
+      RELEASE_SFTP_KEY: ${{ secrets.RELEASE_SFTP_KEY }}
+      RELEASE_SFTP_URI: ${{ secrets.RELEASE_SFTP_URI }}
+    steps:
+      - run: echo "BUILD_VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+      - uses: actions/checkout@v2
+      - uses: docker/login-action@v1
+        if: ${{ !env.ACT }}
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - run: ./build.sh
+        working-directory: rpm
+      - run: echo ${{ env.RELEASE_SFTP_KEY }} | base64 -d > .upload-rsa
+      - run: chmod 0400 .upload-rsa
+      - run: |
+          echo "put rpm/RPMS/x86_64/corteza*.rpm" | \
+            sftp -q -o "StrictHostKeyChecking no" -i .upload-rsa ${{ env.RELEASE_SFTP_URI }}
+      - run: rm -f .upload-rsa

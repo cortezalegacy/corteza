@@ -1,15 +1,16 @@
 %global debug_package %{nil}
 
 Name: corteza
-Version: 2021.3.5
-Release: 1
+Version: %{_rpm_version}
+Release: %{_rpm_release}
 Summary: Corteza
 
 Group: Applications/Productivity
 License: ASL 2.0
 URL: https://cortezaproject.org
-Source0: corteza-2021.3.5-linux-amd64.tar.gz
+Source0: corteza-%{_version}-linux-amd64.tar.gz
 
+AutoReqProv: no
 
 Requires: systemd
 
@@ -24,7 +25,7 @@ Corteza Low Code Corteza Low Code is the flexible and easy to use open source Lo
 Corteza One Corteza One manages the user experience for Corteza applications, such as CRM, and Low Code, as well as providing an integrated interface for third party or other bespoke applications. 100% responsive and with an intuitive design, Corteza One increases productivity and ease of access to all IT resources.
 
 %prep
-%setup -n corteza
+%setup -c -n corteza
 
 
 %build
@@ -32,16 +33,15 @@ Corteza One Corteza One manages the user experience for Corteza applications, su
 
 %install
 mkdir -p $RPM_BUILD_ROOT/var/corteza
-mkdir -p $RPM_BUILD_ROOT/%{_unitdir}
+mkdir -p $RPM_BUILD_ROOT/lib/systemd/system
 mkdir -p $RPM_BUILD_ROOT/opt
+mkdir -p $RPM_BUILD_ROOT/etc
 
 
 cp -a $RPM_BUILD_DIR/corteza $RPM_BUILD_ROOT/opt/corteza
-mv $RPM_BUILD_ROOT/opt/corteza/bin/corteza-server $RPM_BUILD_ROOT/opt/corteza/corteza-server
-rm -rf $RPM_BUILD_ROOT/opt/corteza/bin
 
 
-cat > $RPM_BUILD_ROOT/opt/corteza/.env << EOL
+cat > $RPM_BUILD_ROOT/etc/corteza-server.conf << EOL
 # Corteza configuration
 
 # Note: default docker image without any extra command will
@@ -49,6 +49,7 @@ cat > $RPM_BUILD_ROOT/opt/corteza/.env << EOL
 HTTP_ADDR=:80
 
 HTTP_WEBAPP_ENABLED=true
+HTTP_WEBAPP_BASE_DIR=/opt/corteza/webapp
 
 DOMAIN=localhost
 
@@ -71,13 +72,13 @@ STORAGE_PATH=/var/corteza
 EOL
 
 
-cat > $RPM_BUILD_ROOT%{_unitdir}/corteza-server.service << EOL
+cat > $RPM_BUILD_ROOT/lib/systemd/system/corteza-server.service << EOL
 [Unit]
 Description=Corteza Server Service
 
 [Service]
-WorkingDirectory=/opt/corteza
-ExecStart=/opt/corteza/corteza-server serve-api
+WorkingDirectory=/opt/corteza/bin
+ExecStart=/opt/corteza/bin/corteza-server serve-api
 
 [Install]
 WantedBy=multi-user.target
@@ -85,19 +86,19 @@ WantedBy=multi-user.target
 EOL
 
 
-
 %files
 /opt/corteza
 /var/corteza
-%{_unitdir}/corteza-server.service
+/lib/systemd/system/corteza-server.service
+/etc/corteza-server.conf
 
 
 %post
-ln -s /opt/corteza/.env /etc/corteza-server.conf
+ln -s /etc/corteza-server.conf /opt/corteza/bin/.env
 
 
 %postun
-rm -rf /etc/corteza-server.conf
+rm -rf /opt/corteza/bin/.env
 
 
 %changelog
