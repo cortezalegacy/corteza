@@ -1,8 +1,10 @@
 # build-stage
 FROM alpine:3 as build-stage
 
-ARG CORTEZA_SERVER_PATH=https://releases.cortezaproject.org/files/corteza-server-2021.6.0-rc.3-linux-amd64.tar.gz
-ARG CORTEZA_WEBAPP_PATH=https://releases.cortezaproject.org/files/corteza-webapp-2021.6.0-rc.3.tar.gz
+# use docker build --build-arg VERSION=2021.9.0-dev.1 .
+ARG VERSION=2021.9.0
+ARG CORTEZA_SERVER_PATH=https://releases.cortezaproject.org/files/corteza-server-${VERSION}-linux-amd64.tar.gz
+ARG CORTEZA_WEBAPP_PATH=https://releases.cortezaproject.org/files/corteza-webapp-${VERSION}.tar.gz
 
 RUN mkdir /tmp/server
 RUN mkdir /tmp/webapp
@@ -28,7 +30,7 @@ RUN file "/tmp/webapp/$(basename $CORTEZA_WEBAPP_PATH)" | grep -q 'gzip' && \
 
 
 # deploy-stage
-FROM alpine:3
+FROM ubuntu:20.04
 
 ENV STORAGE_PATH "/data"
 ENV CORREDOR_ADDR "corredor:80"
