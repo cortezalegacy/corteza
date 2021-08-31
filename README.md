@@ -9,7 +9,7 @@ Repository to unify *Corteza Server* and *Corteza Webapp*:
 
 ### Release
 
-In order to do release you need to tag all composed *webapp* repositories.
+In order to do release you need to tag corteza-server, corteza-server-corredor and all composed *webapp* repositories.
 Once you tag main branch, the [pipeline](https://github.com/cortezaproject/corteza/blob/main/.github/workflows/release.yml) is being executed.
 
 We are currently releasing:
