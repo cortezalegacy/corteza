@@ -32,6 +32,11 @@ RUN file "/tmp/webapp/$(basename $CORTEZA_WEBAPP_PATH)" | grep -q 'gzip' && \
 # deploy-stage
 FROM ubuntu:20.04
 
+RUN apt-get -y update \
+ && apt-get -y install \
+    ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+
 ENV STORAGE_PATH "/data"
 ENV CORREDOR_ADDR "corredor:80"
 ENV HTTP_ADDR "0.0.0.0:80"
