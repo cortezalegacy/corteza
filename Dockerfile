@@ -1,10 +1,12 @@
 # build-stage
 FROM alpine:3 as build-stage
 
-# use docker build --build-arg VERSION=2021.9.0-dev.1 .
+# use docker build --build-arg VERSION=2021.9.0 .
 ARG VERSION=2021.9.0
-ARG CORTEZA_SERVER_PATH=https://releases.cortezaproject.org/files/corteza-server-${VERSION}-linux-amd64.tar.gz
-ARG CORTEZA_WEBAPP_PATH=https://releases.cortezaproject.org/files/corteza-webapp-${VERSION}.tar.gz
+ARG SERVER_VERSION=${VERSION}
+ARG WEBAPP_VERSION=${VERSION}
+ARG CORTEZA_SERVER_PATH=https://releases.cortezaproject.org/files/corteza-server-${SERVER_VERSION}-linux-amd64.tar.gz
+ARG CORTEZA_WEBAPP_PATH=https://releases.cortezaproject.org/files/corteza-webapp-${WEBAPP_VERSION}.tar.gz
 
 RUN mkdir /tmp/server
 RUN mkdir /tmp/webapp
@@ -35,6 +37,7 @@ FROM ubuntu:20.04
 RUN apt-get -y update \
  && apt-get -y install \
     ca-certificates \
+    curl \
  && rm -rf /var/lib/apt/lists/*
 
 ENV STORAGE_PATH "/data"
