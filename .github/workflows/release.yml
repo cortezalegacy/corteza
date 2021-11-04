@@ -54,6 +54,7 @@ jobs:
 
   release-rpm:
     runs-on: ubuntu-latest
+    needs: [ release-any ]
     env:
       ENDPOINT: https://releases.cortezaproject.org/files
       RELEASE_SFTP_KEY: ${{ secrets.RELEASE_SFTP_KEY }}
